@@ -27,6 +27,38 @@ const getUser = async (req, res) => {
     }
 }
 
+// Paginated User
+
+const paginatedUsers = async (req, res) => {
+
+    const allUser = await User.find({})
+    const page = parseInt(req.query.page)
+    const limit = parseInt(req.query.limit)
+
+    const startIndex = (page - 1) * limit
+    const lastIndex = (page) * limit
+
+    const results = {}
+    results.totalUser = allUser.length
+    results.pageCount = Math.ceil(allUser.length / limit)
+
+    if (lastIndex < allUser.length) {
+        results.next = {
+            page: page + 1,
+        }
+    }
+
+    if (startIndex > 0) {
+        results.prev = {
+            page: page - 1,
+        }
+    }
+
+    results.result = allUser.slice(startIndex, lastIndex)
+
+    res.status(200).json(results)
+}
+
 // Create
 const createUser = async (req, res) => {
     const { firstName, lastName, email, gender, avatar, domain, available } = req.body
@@ -77,4 +109,6 @@ const deleteUser = async (req, res) => {
     }
 }
 
-module.exports = { createUser, getAllUsers, getUser, updateUser, deleteUser }
+
+
+module.exports = { createUser, getAllUsers, getUser, updateUser, deleteUser, paginatedUsers }
